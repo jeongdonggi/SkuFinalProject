@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="#">
+    <title>이름 변경</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+            crossorigin="anonymous">
+    </script>
+</head>
+<body>
+<form id="UpdateNameForm">
+    <div>
+        <label>Username:</label>
+        <input type="text" id="nickname" placeholder="Enter your username"
+               pattern="^[A-Za-z가-힣]+$"
+               title="올바른 이름을 입력해주세요"
+               required>
+    </div>
+    <button type="submit">이름 변경</button>
+</form>
+
+<script th:inline="javascript">
+    $(document).ready(function(){
+        $("#UpdateNameForm").submit(function(event) {
+            event.preventDefault();
+
+            const nickname = $("#nickname").val();
+
+            const data = {
+                nickname : nickname
+            };
+
+            $.ajax({
+                url: '/user/name',
+                method: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function(response) {
+                    // 필요한 경우, 로그인 페이지나 메인 페이지로 리다이렉트
+                    alert("이름 변경 성공")
+                    console.log(response)
+                    location.href ="/"; // index로 보내기
+                },
+                error: function(error) {
+                    alert("이름 변경 실패: " + error.responseText);
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

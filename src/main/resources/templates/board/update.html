@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="shortcut icon" href="#">
+    <meta charset="UTF-8">
+    <title>게시글 수정</title>
+    <script
+            src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+            crossorigin="anonymous">
+    </script>
+</head>
+<body>
+<form id="boardForm" action="/board/update" method="post" enctype="multipart/form-data"> <!-- {boardId}는 실제 게시글 ID로 치환해야 합니다. -->
+    <input type="hidden" name="boardId" th:value="${boardId}">
+    <table>
+        <tr>
+            <th>title</th>
+            <td><input type="text" name="title" th:value="${board.title}"> </td>
+        </tr>
+        <tr>
+            <th>contents</th>
+            <td><textarea name="content" cols="30" rows="10" th:text="${board.content}"></textarea></td>
+        </tr>
+        <tr>
+            <th>file</th>
+            <td th:each="file, fileStat : ${board.filePath}">
+                <span th:id="'f_'+ ${fileStat.index}" th:text="${board.fileName[fileStat.index]}">파일 이름</span>
+                <input type="button"
+                       th:id="'b_' + ${fileStat.index}"
+                       th:onclick="fileDelete('[[${fileStat.index}]]')"
+                       th:value="삭제">
+            </td>
+        </tr>
+        <tr>
+            <th>upload file</th>
+            <td><input type="file" name="uploadFile" id="boardFile" multiple></td>
+        </tr>
+    </table>
+    <input type="submit" value="수정">
+</form>
+
+<script th:inline="javascript">
+    const fileDelete = (statusIndex) => {
+        const f = document.getElementById("f_" + statusIndex); // file
+        const b = document.getElementById("b_" + statusIndex); // button
+
+        f.style.display = "none";
+        b.style.display = "none";
+
+        const filePathData = [[${board.filePath}]];
+        const originalFilePath = filePathData[statusIndex]; // Path
+
+        const boardId = [[${boardId}]];
+
+        $.ajax({
+            type : "delete",
+            url : "/file/fileDelete",
+            data : {
+                "filePath" : originalFilePath,
+                "boardId" : boardId,
+            },
+            success : function (res){
+                console.log("요청 성공", res);
+            },
+            error : function (err){
+                console.log("요청 실패", err);
+            }
+        })
+    }
+
+    const restrictedExtensions = [
+        '.exe', '.bat', '.com', '.cmd', '.pif', '.scr',
+        '.js', '.vbs', '.ps1', '.sh',
+        '.docm', '.xlsm', '.pptm',
+        '.dll', '.sys', '.cpl', '.jar', '.py',
+        '.php', '.asp', '.aspx', '.shtml', '.jsp', '.htm', '.html'
+    ];
+
+    $('#boardForm').on('submit', function (e) {
+        const files = document.getElementById('boardFile').files // 모든 파일 객체를 반환
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+
+            if (restrictedExtensions.includes(fileExtension)) {
+                alert('업로드 불가능한 확장자 입니다..');
+                e.preventDefault();
+                return;
+            }
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="shortcut icon" href="#">
+    <meta charset="UTF-8">
+    <title>detail</title>
+    <script
+            src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+            crossorigin="anonymous">
+    </script>
+</head>
+<body>
+<input type="hidden" id="page">
+<button onclick="listReq()">목록</button>
+<button onclick="updateReq()">수정</button>
+<button onclick="deleteReq()">삭제</button>
+
+<table>
+    <tr>
+        <th>title</th>
+        <td th:text="${board.title}"></td>
+    </tr>
+    <tr>
+        <th>writer</th>
+        <td th:text="${board.writerDto.getNickname()}"></td>
+    </tr>
+    <tr>
+        <th>contents</th>
+        <td th:text="${board.content}"></td>
+    </tr>
+    <tr>
+        <th>file</th>
+        <td th:each="file, fileStat : ${board.filePath}">
+            <img th:if="${board.isImgFile[fileStat.index]}" th:src="@{'/files/' + ${file}}" alt="image"/>
+            <a th:if="${!board.isImgFile[fileStat.index]}" th:href="@{'/files/' + ${file}}" th:text="${board.fileName[fileStat.index]}"></a>
+        </td>
+    </tr>
+</table>
+
+<!-- 여기서부터는 댓글입니다.-->
+<div id="comment_list">
+
+    <form class="commentForm">
+        <textarea required></textarea>
+        <button type="submit">댓글 작성</button>
+    </form>
+
+    <ul>
+        <th:block th:each="comment : ${commentList}">
+            <li class="commentItem">
+                <span th:text="${comment.writerDto.username}">user1</span>
+                <span th:text="${comment.content}">content1</span>
+                <div th:if="${!comment.isRemoved}">
+                    <button class="editBtn" th:data-comment_id="${comment.commentId}">수정</button>
+                    <button class="deleteBtn" th:data-comment_id="${comment.commentId}">삭제</button>
+                    <button class="replyBtn" th:data-comment_id="${comment.commentId}">대댓글</button>
+                </div>
+
+                <ul class="replies">
+                    <th:block th:each="reComment : ${comment.reCommentInfoDtoList}">
+                        <li class="reCommentItem" >
+                            <span th:text="${reComment.writerDto.username}">user2</span>
+                            <strong>ㄴ</strong> <span th:text="${reComment.content}">content2</span></td>
+                            <div th:if="${!reComment.isRemoved}">
+                                <button class="editBtn" th:data-comment_id="${reComment.reCommentId}">수정</button>
+                                <button class="deleteBtn" th:data-comment_id="${reComment.reCommentId}">삭제</button>
+                            </div>
+                        </li>
+                    </th:block>
+
+                </ul>
+            </li>
+        </th:block>
+    </ul>
+
+    <form class="reCommentForm" style="display: none;">
+        <textarea required></textarea>
+        <button class="reCommentSubmitBtn" type="submit">대댓글 작성</button>
+    </form>
+</div>
+</body>
+
+<script th:inline="javascript">
+    const id = [[${board.boardId}]];
+
+    const listReq = () => {
+        console.log("목록 요청");
+        const page = [[${page}]];
+        location.href = `/board/paging?page=` +page;
+    }
+    const updateReq = () => {
+        console.log("수정 요청");
+        location.href = "/board/update/" + id;
+    }
+    const deleteReq = () => {
+        console.log("삭제 요청");
+        location.href = "/board/delete/" + id;
+    }
+
+    /** 여기서부터는 댓글입니다. **/
+
+    $(document).ready(function (){
+        $('#comment_list').on('submit', '.commentForm',function(e) {
+            e.preventDefault();
+
+            const content = $(this).find('textarea').val();
+            addOrUpdateComment(`/comment/${id}`, 'POST', content, 0);
+        });
+
+        $('#comment_list').on('click', '.replyBtn', function() {
+            const commentId = $(this).data('comment_id');
+            const reCommentForm = $('.reCommentForm'); // <form>
+
+            $('.reCommentForm').find('textarea').val("");
+
+            // 댓글 아래에 현재 폼이 표시되어 있는지 확인
+            if (reCommentForm.is(':visible')) {
+                // 폼을 숨깁니다.
+                reCommentForm.hide();
+            }
+
+            // 원래 댓글의 tr 위치를 찾습니다. (부모 댓글의 위치)
+            const originalCommentLi = $(this).closest('.commentItem');
+            reCommentForm.insertAfter(originalCommentLi); // 해당 댓글 아래에
+
+            reCommentForm.attr('data-comment_id', commentId); // 대댓글 작성 버튼에 comment_id 데이터 넣기
+            reCommentForm.show();
+        });
+
+        $('#comment_list').on('submit', '.reCommentForm' , function (e){
+            e.preventDefault();
+
+            const reCommentForm = $('.reCommentForm'); // <form>
+
+            const content = $(this).find('textarea').val();
+            const commentId = $(this).attr('data-comment_id');
+
+            if (reCommentForm.is(':visible')) {
+                // 폼을 숨깁니다.
+                reCommentForm.hide();
+            }
+
+            addOrUpdateComment(`/comment/${id}/${commentId}`, 'POST', content, 1);
+        });
+
+        $('#comment_list').on('click', '.editBtn', function() {
+            const commentLi = $(this).closest('.commentItem, .reCommentItem');
+            let contentSpan;
+
+            if(commentLi.hasClass('commentItem')){
+                contentSpan = commentLi.find('> span:nth-child(2)');
+            } else if(commentLi.hasClass('reCommentItem')){
+                contentSpan = commentLi.find('> span:nth-child(3)');
+            }
+
+            const originalContent = contentSpan.text();
+
+            contentSpan.html(`<textarea class='editTextarea'>${originalContent}</textarea>`);
+
+            $(this).text('완료').addClass('confirmEdit').removeClass('editBtn');
+        });
+
+        $('#comment_list').on('click', '.confirmEdit', function (){
+            const commentLi = $(this).closest('.commentItem, .reCommentItem');
+            const commentId = commentLi.find('.deleteBtn').data('comment_id');
+            const contentTextarea = commentLi.find('.editTextarea');
+            const newContent = contentTextarea.val();
+
+            // textarea를 span으로 변경
+            contentTextarea.replaceWith(`<span>${newContent}</span>`);
+            // 완료 버튼을 수정 버튼으로 변경
+            $(this).text('수정').addClass('editBtn').removeClass('confirmEdit');
+
+            addOrUpdateComment(`/comment/edit/${commentId}`, 'PUT', newContent);
+        });
+
+        $('#comment_list').on('click', '.deleteBtn', function() {
+            const commentLi = $(this).closest('.commentItem, .reCommentItem');
+            const commentId = $(this).data('comment_id');
+
+            $.ajax({
+                url: `/comment/delete/${commentId}`,
+                type: 'DELETE',
+                success: function() {
+                    commentLi.find('button').remove();
+                    if(commentLi.hasClass('commentItem')){
+                        commentLi.find('span:nth-child(2)').text('삭제된 댓글입니다.');
+                    }else if(commentLi.hasClass('reCommentItem')){
+                        commentLi.find('span:nth-child(3)').text('삭제된 댓글입니다.');
+                    }
+                },
+                error : function (){
+                    alert("댓글 삭제 중 오류가 발생했습니다.");
+                }
+            });
+        });
+        function addOrUpdateComment(url, type, content, attached) { // 0이면 부모, 1이면 자식
+            $.ajax({
+                url: url,
+                type: type,
+                data: {
+                    content: content
+                },
+                success: function(res) {
+                    let commentMarkup;
+
+                    if (type === 'PUT') {
+                        let commentSpan;
+                        if(attached === 0){
+                            commentSpan = $(`button[data-comment_id="${res.commentId}"]`).closest('.commentItem');
+                        }else {
+                            commentSpan = $(`button[data-comment_id="${res.reCommentId}"]`).closest('.reCommentItem');
+                        }
+                        commentSpan.find('span:nth-child(2)').text(res.content);
+                    } else {
+                        if (attached === 0) { // Parent comment
+                            commentMarkup = `
+                            <li class="commentItem">
+                                <span>${res.writerDto.username}</span>
+                                <span>${res.content}</span>
+                                <button class="editBtn" data-comment_id="${res.commentId}">수정</button>
+                                <button class="deleteBtn" data-comment_id="${res.commentId}">삭제</button>
+                                <button class="replyBtn" data-comment_id="${res.commentId}">대댓글</button>
+                            </li>
+                        `;
+                            $('.commentForm').find('textarea').val("");
+                            $('#comment_list > ul').append(commentMarkup);
+                        } else { // Child comment (reply)
+                            commentMarkup = `
+                            <li class="reCommentItem">
+                                <span>${res.writerDto.username}</span>
+                                <strong>ㄴ</strong> <span>${res.content}</span>
+                                <button class="editBtn" data-comment_id="${res.reCommentId}">수정</button>
+                                <button class="deleteBtn" data-comment_id="${res.reCommentId}">삭제</button>
+                            </li>
+                        `;
+                            const parentComment = $(`button[data-comment_id="${res.parentId}"]`).closest('.commentItem');
+                            let replies = parentComment.find('> ul.replies');
+
+                            if(!replies.length){ // 대댓글이 없을 때
+                                parentComment.append('<ul class="replies"></ul>');
+                                replies = parentComment.find('> ul.replies');
+                            }
+                            replies.append(commentMarkup);
+                        }
+                    }
+                },
+                error: function () {
+                    alert("댓글/대댓글 작업 중 오류가 발생했습니다.");
+                }
+            });
+        }
+    });
+</script>
+</html>

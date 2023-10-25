@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="shortcut icon" href="#">
+    <meta charset="UTF-8">
+    <title>권한 변경</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+            crossorigin="anonymous">
+    </script>
+</head>
+<body>
+<table>
+    <tr>
+        <th>userEmail</th>
+        <th>userName</th>
+        <th>권한 설정</th>
+    </tr>
+    <tr th:each="user: ${userList}">
+        <td th:text="${user.username}"></td>
+        <td th:text="${user.nickname}"></td>
+        <td>
+            <form class="authForm">
+                <input type="hidden" class="userId" th:value="${user.id}"/>
+                <select name="authentication" class="auth">
+                    <option th:value="${user.role}" th:text="${user.role}">ROLE</option>
+                    <option th:if="${user.role != 'GUEST'}" value="GUEST">GUEST</option>
+                    <option th:if="${user.role != 'USER'}" value="USER">USER</option>
+                    <option th:if="${user.role != 'MANAGER'}" value="MANAGER">MANAGER</option>
+                    <option th:if="${user.role != 'ADMIN'}" value="ADMIN">ADMIN</option>
+                </select>
+                <button type="submit">변경</button>
+            </form>
+        </td>
+    </tr>
+</table>
+
+<script th:inline="javascript">
+    $(document).ready(function(){
+        $(".authForm").submit(function(event) {
+            event.preventDefault();
+
+            const $form = $(this); // 현재의 form을 참조합니다.
+            const userId = $form.find('.userId').val();  // 현재 폼의 내의 userId 값을 가져옵니다.
+            const authValue = $form.find(".auth").val();  // 현재 폼 내의 select 값을 가져옵니다.
+
+            console.log(userId, authValue);
+
+            const data = {
+                userId: userId,
+                userRole: authValue
+            };
+
+            $.ajax({
+                url: '/updateauthorization',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function(response) {
+                    // 필요한 경우, 로그인 페이지나 메인 페이지로 리다이렉트
+                    alert("변경 성공")
+                    console.log(response)
+                    location.reload();
+                },
+                error: function(error) {
+                    alert("변경 실패: " + error.responseText);
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

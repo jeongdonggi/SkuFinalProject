@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <link rel="shortcut icon" href="#">
+    <title>채팅 리스트</title>
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
+    <link href="/css/styles.css" rel="stylesheet" />
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+            crossorigin="anonymous">
+    </script>
+    <script src="/js/logout.js"></script>
+</head>
+<body class="sb-nav-fixed">
+<div th:replace="~{header :: header}"></div>
+<br><br>
+<div class="container mt-5">
+    <div class="col-12 col-lg-8 offset-lg-2">
+        <h2 class="mb-4">참가자</h2><hr>
+        <div class="col-12 d-flex justify-content-end">
+            <a th:href="@{|/chat/room/${roomId}|}" class="btn btn-outline-secondary" >채팅방으로</a>
+        </div><br>
+        <table class="table text-center">
+            <thead class="thead-dark table-active">
+                <tr>
+                    <th>이름</th>
+                    <th>회원 방출</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="user: ${userList}">
+                    <div th:if="${user.userId} != ${myId}">
+                        <td th:text="${user.nickname}"></td>
+                        <td><button class="btn btn-outline-secondary btn-exit" th:data-user-id="${user.userId}">회원 방출</button></td>
+                    </div>
+                    <div th:if="${user.userId} == ${myId}">
+                        <td th:text="${user.nickname}"></td>
+                        <td></td>
+                    </div>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    $(document).ready(function () {
+        $('.btn-exit').on('click', function () {
+            let userId = $(this).data('user-id');
+            let roomId = /*[[${roomId}]]*/ 'default';
+
+            $.ajax({
+                url: '/chat/exitUser',
+                type: 'POST',
+                data: {
+                    userId : userId,
+                    roomId : roomId,
+                },
+                success: function (res) {
+                    console.log('사용자 방출 성공');
+                    location.reload();
+                },
+                error: function (err) {
+                    alert("사용자가 권한이 없습니다.")
+                    console.error('사용자 방출 실패:', error);
+                }
+            });
+        });
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="/js/scripts.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+</body>
+</html>

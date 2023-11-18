@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <link rel="shortcut icon" href="#">
+    <title>개인 채팅</title>
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
+    <link href="/css/styles.css" rel="stylesheet" />
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+            crossorigin="anonymous">
+    </script>
+    <script src="/js/logout.js"></script>
+</head>
+<body class="sb-nav-fixed">
+<div th:replace="~{header :: header}"></div>
+<br><br>
+<div class="container mt-5">
+    <div class="col-12 col-lg-8 offset-lg-2">
+        <h2 class="mb-4">프라이빗 채팅 생성</h2><hr>
+
+        <form th:action="@{/chat/privateroom}" method="post" id="createRoomForm">
+            <fieldset class="mb-3">
+            <legend>User</legend>
+                <div class="overflow-auto" style="max-height: 200px;">
+                    <div class="form-check" th:each="user, userStat : ${allUser}" th:if="${user.id != creatorId}">
+                        <input class="form-check-input" type="checkbox" name="selectUsers" th:value="${user.id}" th:id="'userCheck' + ${userStat.index}">
+                        <label class="form-check-label" th:for="'userCheck' + ${userStat.index}" th:text="${user.nickname}"></label>
+                    </div>
+                </div>
+            </fieldset>
+            <div class="mb-3">
+                <label for="roomName" class="form-label">Private Room name:</label>
+                <input type="text" class="form-control" id="roomName" name="roomName" placeholder="Enter Room Name">
+            </div>
+            <button type="submit" class="btn btn-primary">방 생성</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById('createRoomForm').addEventListener('submit', function (e){
+        let roomName = document.getElementById('roomName').value;
+        if(roomName.trim() === ''){
+            event.preventDefault();
+            alert("Room name is required.");
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="/js/scripts.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+</body>
+</html>

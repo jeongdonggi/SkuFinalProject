@@ -66,6 +66,7 @@ public class JwtService {
                 .sign(Algorithm.HMAC512(secretKey));
         return token;
     }
+    // 이제 헤더에 넣는거 안씁니다. 쿠키로 바꿨습니다.
     /** 헤더에 accessToken 넣기 **/
     public void setAccessTokenHeader(HttpServletResponse response, String accessToken) {
         response.setHeader(accessHeader, accessToken);
@@ -152,7 +153,7 @@ public class JwtService {
         }
     }
 
-    /** 쿠키로 뽑아봅시다 **/
+    /** 쿠키로 뽑아봅시다 이제 위에서 쓰는 헤더 부분은 사용 안합니다. **/
 
     /** 쿠키를 이용한 엑세스토큰 변경 **/
     public void setAccessTokenInCookie(HttpServletResponse response, String AccessTokenName, String tokenValue)
@@ -161,7 +162,7 @@ public class JwtService {
                 URLEncoder.encode(tokenValue, StandardCharsets.UTF_8.toString()));
         cookie.setPath("/");
         cookie.setHttpOnly(true); // js접근 막음
-        cookie.setMaxAge(Math.toIntExact(accessTokenExpirationPeriod));
+        cookie.setMaxAge(Math.toIntExact(accessTokenExpirationPeriod / 1000));
         response.addCookie(cookie);
     }
 
@@ -172,7 +173,7 @@ public class JwtService {
                 URLEncoder.encode(tokenValue, StandardCharsets.UTF_8.toString()));
         cookie.setPath("/");
         cookie.setHttpOnly(true); // js접근 막음
-        cookie.setMaxAge(Math.toIntExact(refreshTokenExpirationPeriod));
+        cookie.setMaxAge(Math.toIntExact(refreshTokenExpirationPeriod / 1000));
         response.addCookie(cookie);
     }
 
@@ -182,7 +183,7 @@ public class JwtService {
 
         setAccessTokenInCookie(response, "AccessToken", accessToken);
         setRefreshTokenInCookie(response, "RefreshToken", refreshToken);
-        log.info("Access Token, Refresh Token 헤더 설정 완료");
+        log.info("Access Token, Refresh Token 쿠키 설정 완료");
     }
 
     /** jwt 추출 메서드 **/

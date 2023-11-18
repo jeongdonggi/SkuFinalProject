@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>make privateRoom</title>
+</head>
+<body>
+
+
+<form th:action="@{/chat/privateroom}" method="post">
+    <div th:each="user : ${allUser}" >
+        <input type="checkbox" name="selectUsers" th:value="${user.id}" th:if="${user.id != creatorId}">
+        <span th:text="${user.nickname}" th:if="${user.id != creatorId}"></span>
+    </div>
+    Private Room name: <input type="text" name="roomName">
+    <input type="submit" value="Create Room">
+</form>
+</body>
+</html>

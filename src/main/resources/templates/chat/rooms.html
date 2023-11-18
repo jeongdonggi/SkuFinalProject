@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Rooms</title>
+</head>
+<body>
+<!-- 공개 방 목록 -->
+<h3>Public Rooms</h3>
+<ul>
+    <li th:each="room : ${rooms}" th:if="!${room.isPrivate}">
+        <a th:href="@{/chat/room/{roomId}(roomId=${room.id})}" th:text="${room.roomName}">Room Name</a>
+    </li>
+</ul>
+
+<!-- 개인 방 목록 -->
+<h3>Private Rooms</h3>
+<ul>
+    <li th:each="room : ${privateRoom}">
+        <a th:href="@{/chat/room/{roomId}(roomId=${room.id})}" th:text="${room.roomName}">Room Name</a>
+    </li>
+</ul>
+
+
+<form th:action="@{/chat/room}" method="post">
+        Public Room name: <input type="text" name="roomName">
+        <input type="submit" value="Create Room">
+    </form>
+
+    <button><a href="/chat/private">Private Room</a></button>
+</body>
+</html>

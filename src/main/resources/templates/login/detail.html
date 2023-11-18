@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="shortcut icon" href="#">
+    <meta charset="UTF-8">
+    <title>detail</title>
+</head>
+<body>
+<table>
+    <tr>
+        <th>email</th>
+        <th>name</th>
+        <th>role</th>
+    </tr>
+    <tr>
+        <td th:text="${user.username}">1</td>
+        <td th:text="${user.nickname}">e</td>
+        <td th:text="${user.role}">p</td>
+    </tr>
+</table>
+</body>
+</html>

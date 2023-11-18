@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="shortcut icon" href="#">
+    <meta charset="UTF-8">
+    <title>게시글 페이징</title>
+</head>
+<body>
+
+<form action="/board/search" method="get">
+    <label for="search">검색: </label>
+    <div id="search">
+        <select id="searchType" name="searchType">
+            <option value="title">제목</option>
+            <option value="content">내용</option>
+            <option value="both">제목+내용</option>
+        </select>
+        <input type="text" id="searchWord" name="searchWord" required>
+        <button type="submit">검색</button>
+    </div>
+</form>
+
+<table>
+    <thead>
+        <tr>
+            <td>title</td>
+            <td>writer</td>
+            <td>date</td>
+        </tr>
+    </thead>
+        </tr>
+
+    <tbody>
+        <tr th:each="board : ${boardList.simpleLectureDtoList}">
+            <td><a th:href="@{|/board/detail/${board.boardId}?page=${boardList.currentPageNum + 1}|}" th:text="${board.title}">test1</a></td>
+            <td th:text="${board.writerName}"></td>
+            <td th:text="${board.createdDate}">test1</td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- 페이징 처리 -->
+<div class="pagination">
+    <a th:href="@{/board/search(searchType=${searchType}, searchWord=${searchWord} ,page=1)}">First</a>
+    <!-- 이전 페이지로 -->
+    <a th:href="${boardList.currentPageNum == 0} ?
+     '#' : '/board/search?searchType=' + ${searchType} + '&searchWord=' + ${searchWord} +'&page=' + ${boardList.currentPageNum} ">prev</a>
+
+
+    <span th:each="page: ${#numbers.sequence(startPage, endPage)}">
+        <!-- 현재페이지는 링크 없이 숫자만 -->
+        <span th:if="${page == boardList.currentPageNum + 1}" th:text="${page}"></span>
+        <!-- 현재페이지 번호가 아닌 다른 페이지번호에는 링크를 보여줌 -->
+        <span th:unless="${page == boardList.currentPageNum + 1}">
+            <a th:href="@{/board/search(searchType=${searchType},searchWord=${searchWord}, page=${page})}"
+               th:text="${page}"></a>
+        </span>
+    </span>
+
+    <a th:href="${boardList.currentPageNum == boardList.totalPageCount - 1} ?
+    '#' : '/board/search?searchType=' + ${searchType} + '&searchWord=' + ${searchWord} + '&page=' + ${boardList.currentPageNum + 2}">next</a>
+
+
+    <a th:href="@{/board/search(searchType=${searchType}, searchWord=${searchWord},page=${boardList.totalPageCount})}">Last</a>
+</div>
+<button><a href="/board/paging">목록으로</a></button>
+</body>
+</html>

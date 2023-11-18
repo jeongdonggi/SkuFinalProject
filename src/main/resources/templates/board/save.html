@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="shortcut icon" href="#">
+    <meta charset="UTF-8">
+    <title>게시글 작성</title>
+    <script
+            src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+            crossorigin="anonymous">
+    </script>
+</head>
+<body>
+<form id="boardForm" action="/board/save" method="post" enctype="multipart/form-data">
+    title: <input type="text" name="title"> <br>
+    contents: <textarea name="content" cols="30" rows="10"></textarea> <br>
+    file: <input type="file" name="uploadFile" id="boardFile" multiple> <br>
+    <input type="submit" value="글작성">
+</form>
+
+<script>
+    const restrictedExtensions = [
+        '.exe', '.bat', '.com', '.cmd', '.pif', '.scr',
+        '.js', '.vbs', '.ps1', '.sh',
+        '.docm', '.xlsm', '.pptm',
+        '.dll', '.sys', '.cpl', '.jar', '.py',
+        '.php', '.asp', '.aspx', '.shtml', '.jsp', '.htm', '.html'
+    ];
+
+    $('#boardForm').on('submit', function (e) {
+        const files = document.getElementById('boardFile').files // 모든 파일 객체를 반환
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+
+            if (restrictedExtensions.includes(fileExtension)) {
+                alert('업로드 불가능한 확장자 입니다..');
+                e.preventDefault();
+                return;
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

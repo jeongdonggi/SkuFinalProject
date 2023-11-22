@@ -45,25 +45,20 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> // URL별 권한 관리 옵션
                         auth
+                                .requestMatchers("/css/**", "/js/**").permitAll()
                                 .requestMatchers("/", "/signup", "/loginForm", "/password" ,"/favicon.ico", "/error").permitAll()
                                 .requestMatchers("/login", "/signUp").permitAll()
                                 .requestMatchers( "/files/**").hasAnyRole("USER", "ADMIN", "MANAGER")
-                                .requestMatchers("/board/**").hasAnyRole("SEMIUSER","USER", "ADMIN", "MANAGER")
+                                .requestMatchers("/board/**", "/chat/**").hasAnyRole("SEMIUSER","USER", "ADMIN", "MANAGER")
                                 .requestMatchers("/updateauthorization").hasAnyRole("ADMIN", "MANAGER")
                                 .requestMatchers("/user/updateAuth").hasAnyRole("ADMIN", "MANAGER")
                                 .anyRequest().authenticated() // 인증된 사용자만 접근 가능
                 )
                 .addFilterAfter(customUsernamePasswordAuthenticationFilter(), LogoutFilter.class)
-                .addFilterBefore(jwtAuthenticationProcessingFilter(), CustomUsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationProcessingFilter(), CustomUsernamePasswordAuthenticationFilter.class); // 로그인 후에는 모든 요청이 JWT 필터를 거치게 된다.
 
         return http.build();
     }
-
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers("/css/**", "/js/**", "/images/**");
-    }
-
 
     //BCryptPasswordEncoder를 사용하는 DelegatingPasswordEncoder를 사용하는 것임
     @Bean

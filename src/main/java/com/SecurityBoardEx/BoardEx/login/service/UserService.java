@@ -45,7 +45,10 @@ public class UserService {
         user.passwordEncode(passwordEncoder);
 
         if(userRepository.findByUsername(userDto.username()).isPresent()){
-            throw new UserException(UserExceptionType.ALREADY_EXIST_USERNAME);
+            UserException userException = new UserException(UserExceptionType.ALREADY_EXIST_USERNAME);
+            log.info("UserException.getErrorCode() : {}", userException.getExceptionType().getErrorCode());
+            log.info("UserException.getErrorMessage : {}", userException.getExceptionType().getErrorMessage());
+            throw new Exception("이미 존재하는 사용자 이름입니다.");
         }
 
         userRepository.save(user); //userEntity 저장

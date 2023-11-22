@@ -67,6 +67,47 @@ public class JwtService {
         return token;
     }
 
+    // 이제 헤더에 넣는거 안씁니다. 쿠키로 바꿨습니다.
+    /** 헤더에 accessToken 넣기 **/
+    public void setAccessTokenHeader(HttpServletResponse response, String accessToken) {
+        response.setHeader(accessHeader, accessToken);
+    }
+    /** 헤더에 refreshToken 넣기 **/
+    public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken) {
+        response.setHeader(refreshHeader, refreshToken);
+    }
+
+    /** AccessToken 헤더에 실어서 보내기 **/
+    public void sendAccessToken(HttpServletResponse response, String accessToken){
+        response.setStatus(HttpServletResponse.SC_OK);
+
+        setAccessTokenHeader(response, accessToken);
+        log.info("재발급된 Access Token : {}", accessToken);
+    }
+
+    /** AccessToken + RefreshToken 헤더에 실어서 보내기 **/
+    public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken){
+        response.setStatus(HttpServletResponse.SC_OK);
+
+        setAccessTokenHeader(response, accessToken);
+        setRefreshTokenHeader(response, refreshToken);
+        log.info("Access Token, Refresh Token 헤더 설정 완료");
+    }
+
+    /** 헤더에서 AccessToken 추출 **/
+    public Optional<String> extractAccessToken(HttpServletRequest request) {
+        return Optional.ofNullable(request.getHeader(accessHeader))
+                .filter(accessToken -> accessToken.startsWith(BEARER))
+                .map(accessToken -> accessToken.replace(BEARER, ""));
+    }
+
+    /** 헤더에서 RefreshToken 추출 **/
+    public Optional<String> extractRefreshToken(HttpServletRequest request){
+        return Optional.ofNullable(request.getHeader(refreshHeader))
+                .filter(refreshToken -> refreshToken.startsWith(BEARER))
+                .map(refreshToken -> refreshToken.replace(BEARER, ""));
+    }
+
     /** AccessToken에서 Username 추출
      * JWT.require()로 검증기 생성 -> verify로 검증 -> 유효하면 이메일 추출 , 아니면 빈 Optional 반환
      * **/

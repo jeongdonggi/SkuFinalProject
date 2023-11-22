@@ -13,6 +13,7 @@ import com.SecurityBoardEx.BoardEx.chat.exception.ChatRoomUserExceptionType;
 import com.SecurityBoardEx.BoardEx.chat.repository.ChatMessageRepository;
 import com.SecurityBoardEx.BoardEx.chat.repository.ChatRoomRepository;
 import com.SecurityBoardEx.BoardEx.chat.repository.ChatRoomUserRepository;
+import com.SecurityBoardEx.BoardEx.file.service.FileService;
 import com.SecurityBoardEx.BoardEx.login.entity.UserEntity;
 import com.SecurityBoardEx.BoardEx.login.exception.UserException;
 import com.SecurityBoardEx.BoardEx.login.exception.UserExceptionType;
@@ -49,7 +50,7 @@ public class ChatService {
         return convertToChatRoomDetailsDto(roomEntity);
     }
 
-    public void createRoom(String roomName, String username){
+    public Long createRoom(String roomName, String username){
         UserEntity creator = userRepository.findByUsername(username).orElseThrow(() ->
                 new UserException(UserExceptionType.NOT_FOUND_USER));
 
@@ -58,10 +59,11 @@ public class ChatService {
                 .roomName(roomName)
                 .isPrivate(false)
                 .build();
-        chatRoomRepository.save(newRoom);
+        ChatRoomEntity save = chatRoomRepository.save(newRoom);
+        return save.getId();
     }
 
-    public void createRoomWithParticipants(String roomName, String creatorUsername, List<Long> participantIds){
+    public Long createRoomWithParticipants(String roomName, String creatorUsername, List<Long> participantIds){
         UserEntity creator = userRepository.findByUsername(creatorUsername).orElseThrow(() ->
                 new UserException(UserExceptionType.NOT_FOUND_USER));
 
@@ -85,7 +87,8 @@ public class ChatService {
             chatRoomUserRepository.save(newUser);
         }
         saveRoom.setCount(participantIds.size());
-        chatRoomRepository.save(saveRoom);
+        ChatRoomEntity save = chatRoomRepository.save(saveRoom);
+        return  save.getId();
     }
 
     public boolean joinRoom(Long roomId, Long userId){

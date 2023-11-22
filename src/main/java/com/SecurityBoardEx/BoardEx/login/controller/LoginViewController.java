@@ -1,18 +1,16 @@
 package com.SecurityBoardEx.BoardEx.login.controller;
 
 import com.SecurityBoardEx.BoardEx.login.dto.UserInfoDto;
+import com.SecurityBoardEx.BoardEx.login.dto.UserSignUpDto;
 import com.SecurityBoardEx.BoardEx.login.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.parameters.P;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 

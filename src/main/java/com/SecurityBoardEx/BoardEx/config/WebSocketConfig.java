@@ -1,6 +1,5 @@
 package com.SecurityBoardEx.BoardEx.config;
 
-import com.SecurityBoardEx.BoardEx.login.auth.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

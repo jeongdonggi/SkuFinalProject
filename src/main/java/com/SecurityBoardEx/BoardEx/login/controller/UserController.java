@@ -20,10 +20,10 @@ public class UserController {
 
     /** 회원 가입 **/
     @PostMapping("/signUp")
-    @ResponseStatus(HttpStatus.OK)
     public void signUp(@Valid @RequestBody UserSignUpDto userDto) throws Exception{
         System.out.println("UserController.signUp");
         System.out.println("userDto = " + userDto);
+
         userService.signUp(userDto);
     }
 

@@ -8,11 +8,10 @@ import com.SecurityBoardEx.BoardEx.login.dto.UserInfoDto;
 import com.SecurityBoardEx.BoardEx.login.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -106,7 +105,14 @@ public class ChatRoomController {
     public String createRoom(@RequestParam String roomName) throws Exception {
         UserInfoDto creator = userService.getMyInfo();
         String username = creator.getUsername();
-        chatService.createRoom(roomName, username);
+        Long roomId = chatService.createRoom(roomName, username);
+        ChatRoomDetailsDto room = chatService.findByRoomId(roomId);
+
+        JSONObject roomInfo = new JSONObject();
+        roomInfo.put("id", room.getId());
+        roomInfo.put("roomName", room.getRoomName());
+
+        messagingTemplate.convertAndSend("/sub/chat/rooms", roomInfo.toString());
         return "redirect:/chat/rooms";
     }
 
@@ -139,7 +145,13 @@ public class ChatRoomController {
         }
         selectUsers.add(userId);
 
-        chatService.createRoomWithParticipants(roomName, username, selectUsers);
+        Long roomId = chatService.createRoomWithParticipants(roomName, username, selectUsers);
+        ChatRoomDetailsDto room = chatService.findByRoomId(roomId);
+        JSONObject roomInfo = new JSONObject();
+        roomInfo.put("id", room.getId());
+        roomInfo.put("roomName", room.getRoomName());
+
+        messagingTemplate.convertAndSend("/sub/chat/privaterooms", roomInfo.toString());
         return "redirect:/chat/privaterooms";
     }
 

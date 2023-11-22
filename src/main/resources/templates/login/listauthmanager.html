@@ -47,7 +47,7 @@
                         <select name="authentication" class="form-select">
                             <option th:value="${user.role}" th:text="${user.role}">ROLE</option>
                             <option th:if="${user.role != 'GUEST'}" value="GUEST">GUEST</option>
-                            <option th:if="${user.role != 'SEMIUSER'}" value="USER">SEMIUSER</option>
+                            <option th:if="${user.role != 'SEMIUSER'}" value="SEMIUSER">SEMIUSER</option>
                             <option th:if="${user.role != 'USER'}" value="USER">USER</option>
                             <option th:if="${user.role != 'MANAGER'}" value="MANAGER">MANAGER</option>
                         </select>

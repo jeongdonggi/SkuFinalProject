@@ -1,6 +1,7 @@
 package com.SecurityBoardEx.BoardEx.file.entity;
 
 import com.SecurityBoardEx.BoardEx.board.entity.BoardEntity;
+import com.SecurityBoardEx.BoardEx.chat.entity.ChatMessageEntity;
 import com.SecurityBoardEx.BoardEx.login.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;

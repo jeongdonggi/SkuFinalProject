@@ -8,6 +8,8 @@
     <meta name="author" content="" />
     <link rel="shortcut icon" href="#">
     <title>채팅 목록</title>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
     <link href="/css/styles.css" rel="stylesheet" />
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
@@ -29,7 +31,7 @@
 <div class="container mt-5">
     <div class="col-12 col-lg-8 offset-lg-2">
         <h2 class="mb-4">개인 채팅 목록</h2><hr>
-        <ul class="list-group">
+        <ul class="list-group" id="roomList">
             <li class="list-group-item" th:each="room : ${privateRoom}">
                 <a class="text-decoration-none" th:href="@{/chat/room/{roomId}(roomId=${room.id})}"
                    th:text="${room.roomName}">Room Name</a>
@@ -40,6 +42,33 @@
     </div>
 </div>
 
+<script>
+    function connect() {
+        let socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function () {
+            stompClient.subscribe('/sub/chat/privaterooms', function (msg){
+                saveRoom(JSON.parse(msg.body));
+            })
+        });
+    }
+
+    function saveRoom(message){
+        let room = message;
+        let roomList = document.getElementById("roomList");
+        let roomLi = document.createElement("li");
+        let roomA = document.createElement("a");
+
+        roomLi.classList.add("list-group-item");
+        roomA.href =`/chat/room/${room.id}`
+        roomA.textContent = room.roomName;
+
+        roomLi.appendChild(roomA);
+        roomList.appendChild(roomLi);
+    }
+
+    connect();
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 <script src="/js/scripts.js"></script>

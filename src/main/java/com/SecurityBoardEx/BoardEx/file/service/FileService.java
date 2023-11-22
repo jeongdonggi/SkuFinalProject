@@ -6,6 +6,7 @@ import com.SecurityBoardEx.BoardEx.board.exception.BoardException;
 import com.SecurityBoardEx.BoardEx.board.exception.BoardExceptionType;
 import com.SecurityBoardEx.BoardEx.board.repository.BoardRepository;
 import com.SecurityBoardEx.BoardEx.board.service.BoardService;
+import com.SecurityBoardEx.BoardEx.chat.entity.ChatMessageEntity;
 import com.SecurityBoardEx.BoardEx.config.SecurityUtil;
 import com.SecurityBoardEx.BoardEx.file.dto.FileInfoDto;
 import com.SecurityBoardEx.BoardEx.file.entity.FileEntity;
@@ -54,7 +55,6 @@ public class FileService {
         String filePath = fileDir + UUID.randomUUID() + extension;
         try {
             multipartFile.transferTo(new File(filePath));
-
         } catch (IOException e){
             throw new FileException(FileExceptionType.FILE_CAN_NOT_SAVE);
         }
@@ -73,7 +73,7 @@ public class FileService {
                 boolean imageFile = isImageFile(file);
 
                 FileEntity fileEntity = new FileEntity(board, savedFilePath, savedFileName, imageFile);
-                board.addFile(fileEntity);
+                board.addFile(fileEntity); // 영속성 컨텍스트에 의해 관리되어 board가 저장시 같이 커밋
             }
         }
     }
@@ -103,7 +103,7 @@ public class FileService {
 
         if (targetFileEntity != null) {
             board.getFileEntityList().remove(targetFileEntity);
-            //fileRepository.delete(targetFileEntity);  // JPA 영속성 때문에 Entity를 변경하면 db에도 적용 됨
+            fileRepository.delete(targetFileEntity);  // JPA 영속성 때문에 Entity를 변경하면 db에도 적용 됨
         }
     }
 

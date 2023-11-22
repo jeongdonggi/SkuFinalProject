@@ -44,14 +44,14 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository{
 //                        titleHasStr(boardSearchCondition.getTitle())
                         builder
                 )
-                .leftJoin(boardEntity.writer, userEntity)
-                .fetchJoin()
-                .orderBy(boardEntity.createdDate.desc())
+                .leftJoin(boardEntity.writer, userEntity) // board.writer에 userEntity값이 연결됨
+                .fetchJoin() // 한번에 가져오기
+                .orderBy(boardEntity.createdDate.desc()) // 페이징
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        JPAQuery<BoardEntity> countQuery = query.selectFrom(boardEntity)
+        JPAQuery<BoardEntity> countQuery = query.selectFrom(boardEntity) // 총 게시글 찾는 쿼리
                 .where(
                         contentHasStr(boardSearchCondition.getContent()),
                         titleHasStr(boardSearchCondition.getTitle())

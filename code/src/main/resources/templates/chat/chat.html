@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <link rel="shortcut icon" href="#">
+    <title>Simple Chat</title>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
+    <link href="/css/styles.css" rel="stylesheet" />
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+            crossorigin="anonymous">
+    </script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="/js/logout.js"></script>
+    <style>
+        a{
+            text-decoration: none;
+            color: #1a1e21;
+        }
+        .chatmessage {
+            background-color: #f1f1f1;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: inline-block;
+            max-width: calc(100% - 20px); /* 100% minus any desired padding */
+            word-wrap: break-word;
+            box-sizing: border-box;
+        }
+
+        .othermessage {
+            background-color: #ddd;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 0.667em;
+            color: #6c757d;
+            width: 100%;
+            box-sizing: border-box;
+            display: inline-block;
+        }
+
+    </style>
+</head>
+<body class="sb-nav-fixed">
+    <div th:replace="~{header :: header}"></div>
+    <br><br>
+    <div class="container mt-5">
+        <div class="col-12 col-lg-8 offset-lg-2">
+            <h2 class="mb-4">채팅방</h2><hr>
+            <div id="user-count" class="mb-2"></div>
+            <div class="col-12 d-flex justify-content-end">
+                <a th:href="@{|/chat/room/${roomId}/users|}" class="btn btn-outline-secondary" >목록</a>
+                <button class="btn btn-outline-secondary" onclick="sendLeaveRoomMessage()">나가기</button>
+            </div><br>
+
+            <div id="chat-room" class="mb-3">
+                <div th:if="${messages}">
+                    <div id="message-container" class="overflow-auto" style="height: 400px">
+                        <ul id="chat-messages" class="list-group">
+                            <li th:each="msg : ${messages}" class="list-group-item">
+                                <div th:if="${msg.type.name} == 'CHAT'" class="chatmessage">
+                                    <span th:text="${msg.sender}">Sender</span>
+                                    <span > : </span>
+                                    <span th:text="${msg.message}">Message</span>
+                                </div>
+                                <div th:if="${msg.type.name} != 'CHAT'" class="othermessage">
+                                    <span th:text="${msg.message}">Message</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group mb-3">
+                <input class="form-control" type="text" id="chat-input" />
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script th:inline="javascript">
+    let stompClient = null;
+
+    let username = /*[[${username}]]*/ 'default';
+    let roomId = /*[[${roomId}]]*/ 'default';
+    let userId = /*[[${userId}]]*/ 'default';
+    let isPrivate = /*[[${isprivate}]]*/ 'default';
+
+
+    document.getElementById("chat-input").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            sendMessage();
+        }
+    });
+
+
+    function connect() {
+        let socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            stompClient.subscribe('/sub/chat/room/' + roomId, function (chatMessage) {
+                showChatMessage(JSON.parse(chatMessage.body));
+            });
+            sendJoinRoomMessage();
+
+            stompClient.subscribe('/user/queue/exit', function (msg){
+                alert(msg.body);
+                if(stompClient !== null){
+                    stompClient.disconnect();
+                }
+                window.location.href = "/main";
+            })
+        });
+    }
+
+    // 방에 참여하기 위한 메시지 전송
+    function sendJoinRoomMessage() {
+        let enterMessage = {
+            chatRoom: roomId,
+            chatRoomUser: userId,
+            sender: username,
+            type: "JOIN"
+        };
+        stompClient.send("/pub/chat/join", {}, JSON.stringify(enterMessage));
+    }
+
+    // 메시지 전송
+    function sendMessage() {
+        let messageInput = document.getElementById("chat-input");
+        let chatMessage = {
+            chatRoom: roomId,
+            message: messageInput.value,
+            sender: username,
+            chatRoomUser: userId,
+            type: "CHAT"
+        };
+        stompClient.send("/pub/chat/send", {}, JSON.stringify(chatMessage));
+        messageInput.value = "";
+    }
+
+    // 방에서 나가기 위한 메시지 전송
+    function sendLeaveRoomMessage() {
+
+        let leaveMessage = {
+            chatRoom: roomId,
+            chatRoomUser: userId,
+            sender: username,
+            type: "LEAVE"
+        };
+
+        stompClient.send("/pub/chat/leave", {}, JSON.stringify(leaveMessage));
+
+        // Disconnect the client
+        if (stompClient !== null) {
+            stompClient.disconnect();
+        }
+
+
+        if(isPrivate){
+            alert("채탱방을 나가셨습니다.");
+            window.location.href = "/chat/privaterooms";
+        }else{
+            alert("채탱방을 나가셨습니다.");
+            window.location.href = "/chat/rooms";
+        }
+    }
+
+    function showChatMessage(message) {
+        let messagesList = document.getElementById("chat-messages");
+        let messageLi = document.createElement("li");
+        let messageDiv = document.createElement("div");
+        let messageContainer = document.getElementById("message-container");
+
+        messageLi.classList.add("list-group-item")
+
+        if (message.type === 'JOIN'|| message.type === 'LEAVE') {
+            messageDiv.classList.add("othermessage"); // CSS 클래스를 추가하여 스타일 적용
+            let msgSpan = document.createElement("span");
+            msgSpan.textContent = message.message;
+            messageDiv.appendChild(msgSpan);
+            updateUserCount();
+        }else {
+            messageDiv.classList.add("chatmessage");
+            let senderSpan = document.createElement("span");
+            senderSpan.textContent = message.sender;
+            let midSpan = document.createElement("span");
+            midSpan.textContent = " : ";
+            let msgSpan = document.createElement("span");
+            msgSpan.textContent = message.message;
+            messageDiv.appendChild(senderSpan);
+            messageDiv.appendChild(midSpan);
+            messageDiv.appendChild(msgSpan);
+        }
+        messageLi.appendChild(messageDiv);
+        messagesList.appendChild(messageLi);
+        messageContainer.scrollTop = messageContainer.scrollHeight; // 자동 스크롤 다운
+    }
+
+    function updateUserCount(){
+        $.ajax({
+            url: '/chat/userCount/' + roomId,
+            method: 'GET',
+            success: function (res){
+                let userCountElement = document.getElementById('user-count');
+                userCountElement.innerText = 'User Count : ' + res;
+            },
+            error: function (err){
+                console.error('Failed to update user count : ' + err);
+            }
+        })
+    }
+
+    connect();
+    updateUserCount();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="/js/scripts.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script><script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+            integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+            crossorigin="anonymous"></script>
+</body>
+</html>

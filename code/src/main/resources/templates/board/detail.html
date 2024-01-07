@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <link rel="shortcut icon" href="#">
+    <title>게시글 수정</title>
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
+    <link href="/css/styles.css" rel="stylesheet" />
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css?family=Nunito:400,700&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+            crossorigin="anonymous">
+    </script>
+    <script src="/js/logout.js"></script>
+</head>
+<body class="sb-nav-fixed">
+<div th:replace="~{header :: header}"></div>
+<br><br>
+<div class="container mt-5">
+    <div class="col-12 col-lg-8 offset-lg-2">
+        <h2 class="mb-4">게시글 </h2><hr>
+        <input type="hidden" id="page">
+        <div class="col-12 d-flex justify-content-end">
+            <button onclick="listReq()" class="btn btn-primary me-2">목록</button>
+            <button onclick="updateReq()" class="btn btn-secondary me-2">수정</button>
+            <button onclick="deleteReq()" class="btn btn-danger me-2">삭제</button>
+        </div><br>
+        <div class="card">
+            <div class="card-header col-12 d-flex justify-content-end">
+                <h5 th:text="${board.writerDto.getNickname()}">작성자</h5>
+            </div>
+            <div class="card-body">
+                <h4 class="card-title" th:text="${board.title}">제목</h4><hr>
+                <p class="card-text" th:text="${board.content}">내용</p>
+
+                <div th:each="file, fileStat : ${board.filePath}">
+                    <img th:if="${board.isImgFile[fileStat.index]}" th:src="@{'/files/' + ${file}}" alt="image" class="img-fluid mb-2"/>
+                    <a th:if="${!board.isImgFile[fileStat.index]}" th:href="@{'/files/' + ${file}}" th:text="${board.fileName[fileStat.index]}" class="d-block mb-2"></a>
+                </div>
+            </div>
+        </div><hr>
+        <!-- 여기서부터는 댓글입니다.-->
+        <div id="comment_list" class="mt-4">
+            <h5>댓글</h5>
+            <form class="commentForm mb-3">
+                <textarea class="form-control mb-2" required></textarea>
+                <button type="submit" class="btn btn-secondary">댓글 작성</button>
+            </form>
+
+            <ul class="list-unstyled">
+                <th:block th:each="comment : ${commentList}">
+                    <li class="commentItem mb-2">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <span class="fw-bold" th:text="${comment.writerDto.nickname}">user1</span>
+                                <span th:text="${comment.content}">content1</span>
+                                <small class="text-muted"><span th:text="${#temporals.format(comment.createTime, 'yyyy-MM-dd HH:mm')}">2023-01-01 12:00</span></small>
+                            </div>
+                            <div th:if="${!comment.isRemoved}">
+                                <button class="editBtn btn btn-sm btn-outline-primary" th:data-comment_id="${comment.commentId}">수정</button>
+                                <button class="replyBtn btn btn-sm btn-outline-secondary" th:data-comment_id="${comment.commentId}">대댓글</button>
+                                <button class="deleteBtn btn btn-sm btn-outline-danger" th:data-comment_id="${comment.commentId}">삭제</button>
+                            </div>
+                        </div>
+
+                        <ul class="replies list-unstyled ps-4">
+                            <th:block th:each="reComment : ${comment.reCommentInfoDtoList}">
+                                <li class="reCommentItem my-1" >
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <span class="fw-bold" th:text="${reComment.writerDto.nickname}">user2</span>
+                                            <strong>ㄴ</strong> <span th:text="${reComment.content}">content2</span></td>
+                                            <small class="text-muted"><span th:text="${#temporals.format(reComment.createTime, 'yyyy-MM-dd HH:mm')}">2023-01-01 12:00</span></small>
+
+                                        </div>
+                                        <div th:if="${!reComment.isRemoved}">
+                                            <button class="editBtn btn btn-sm btn-outline-primary" th:data-comment_id="${reComment.reCommentId}">수정</button>
+                                            <button class="deleteBtn btn btn-sm btn-outline-danger" th:data-comment_id="${reComment.reCommentId}">삭제</button>
+                                        </div>
+                                    </div>
+                                </li>
+                            </th:block>
+
+                        </ul>
+                    </li>
+                </th:block>
+            </ul>
+
+            <form class="reCommentForm" style="display: none;">
+                <textarea class="form-control mb-2" required></textarea>
+                <button class="reCommentSubmitBtn btn btn-sm btn-outline-secondary" type="submit">대댓글 작성</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const id = [[${board.boardId}]];
+
+    const listReq = () => {
+        console.log("목록 요청");
+        const page = [[${page}]];
+        location.href = `/board/paging?page=` +page;
+    }
+    const updateReq = () => {
+        console.log("수정 요청");
+        location.href = "/board/update/" + id;
+    }
+    const deleteReq = () => {
+        console.log("삭제 요청");
+        location.href = "/board/delete/" + id;
+    }
+
+    /** 여기서부터는 댓글입니다. **/
+
+    $(document).ready(function (){
+        $('#comment_list').on('submit', '.commentForm',function(e) {
+            e.preventDefault();
+
+            const content = $(this).find('textarea').val();
+            addOrUpdateComment(`/comment/${id}`, 'POST', content, 0);
+        });
+
+        $('#comment_list').on('click', '.replyBtn', function() {
+            const commentId = $(this).data('comment_id');
+            const reCommentForm = $('.reCommentForm'); // <form>
+
+            $('.reCommentForm').find('textarea').val("");
+
+            // 댓글 아래에 현재 폼이 표시되어 있는지 확인
+            if (reCommentForm.is(':visible')) {
+                // 폼을 숨깁니다.
+                reCommentForm.hide();
+            }
+
+            // 원래 댓글의 tr 위치를 찾습니다. (부모 댓글의 위치)
+            const originalCommentLi = $(this).closest('.commentItem');
+            reCommentForm.insertAfter(originalCommentLi); // 해당 댓글 아래에
+
+            reCommentForm.attr('data-comment_id', commentId); // 대댓글 작성 버튼에 comment_id 데이터 넣기
+            reCommentForm.show();
+        });
+
+        $('#comment_list').on('submit', '.reCommentForm' , function (e){
+            e.preventDefault();
+
+            const reCommentForm = $('.reCommentForm'); // <form>
+
+            const content = $(this).find('textarea').val();
+            const commentId = $(this).attr('data-comment_id');
+
+            if (reCommentForm.is(':visible')) {
+                // 폼을 숨깁니다.
+                reCommentForm.hide();
+            }
+
+            addOrUpdateComment(`/comment/${id}/${commentId}`, 'POST', content, 1);
+        });
+
+        $('#comment_list').on('click', '.editBtn', function() {
+            const commentLi = $(this).closest('.commentItem, .reCommentItem');
+            let contentSpan;
+
+            if(commentLi.hasClass('commentItem')){
+                contentSpan = commentLi.find('.fw-bold').next('span');
+            } else if(commentLi.hasClass('reCommentItem')){
+                contentSpan = commentLi.find('strong').next('span');
+            }
+
+            const originalContent = contentSpan.text().trim();
+
+            contentSpan.html(`<textarea class='editTextarea form-control mb-2' data-original-content='${originalContent}'>
+                                        ${originalContent}</textarea>`);
+
+            $(this).text('완료').addClass('confirmEdit').removeClass('editBtn');
+        });
+
+        $('#comment_list').on('click', '.confirmEdit', function (){
+            const commentLi = $(this).closest('.commentItem, .reCommentItem');
+            const commentId = commentLi.find('.deleteBtn').data('comment_id');
+            const contentTextarea = commentLi.find('.editTextarea');
+            const newContent = contentTextarea.val();
+
+            // textarea를 span으로 변경
+            contentTextarea.replaceWith(`<span>${newContent}</span>`);
+            // 완료 버튼을 수정 버튼으로 변경
+            $(this).text('수정').addClass('editBtn').removeClass('confirmEdit');
+
+            addOrUpdateComment(`/comment/edit/${commentId}`, 'PUT', newContent);
+        });
+
+        $('#comment_list').on('click', '.deleteBtn', function() {
+            const commentLi = $(this).closest('.commentItem, .reCommentItem');
+            const commentId = $(this).data('comment_id');
+
+            $.ajax({
+                url: `/comment/delete/${commentId}`,
+                type: 'DELETE',
+                success: function() {
+                    if(commentLi.hasClass('commentItem')){
+                        commentLi.find('> .d-flex > div:nth-child(2) > button').remove();
+                        commentLi.find('span:nth-child(2)').text('삭제된 댓글입니다.');
+                    }else if(commentLi.hasClass('reCommentItem')){
+                        commentLi.find('> div > div:nth-child(2) > button').remove();
+                        commentLi.find('span:nth-child(3)').text('삭제된 댓글입니다.');
+                    }
+                },
+                error : function (){
+                    alert("댓글 삭제 중 오류가 발생했습니다.");
+                }
+            });
+        });
+
+        function addOrUpdateComment(url, type, content, attached) { // 0이면 부모, 1이면 자식
+            $.ajax({
+                url: url,
+                type: type,
+                data: {
+                    content: content
+                },
+                success: function(res) {
+                    let commentMarkup;
+
+                    if (type === 'PUT') {
+                        let commentSpan;
+                        if(attached === 0){
+                            commentSpan = $(`button[data-comment_id="${res.commentId}"]`).closest('.commentItem').find('span:nth-child(2)');
+                        }else {
+                            commentSpan = $(`button[data-comment_id="${res.reCommentId}"]`).closest('.reCommentItem').find('span:nth-child(3)');
+                        }
+                        commentSpan.text(res.content);
+                        $(this).text('수정').addClass('editBtn').removeClass('confirmEdit');
+                    } else {
+                        let createDate = new Date(res.createTime);
+                        let formattedDate = formatDate(createDate, 'yyyy-MM-dd HH:nn');
+                        if (attached === 0) { // Parent comment
+
+                            commentMarkup = `
+                            <li class="commentItem mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <span class="fw-bold">${res.writerDto.nickname}</span>
+                                        <span>${res.content}</span>
+                                        <small class="text-muted"><span th:text="${formattedDate}">2023-01-01 12:00</span></small>
+
+                                    </div>
+                                    <div>
+                                        <button class="editBtn btn btn-sm btn-outline-primary" data-comment_id="${res.commentId}">수정</button>
+                                        <button class="replyBtn btn btn-sm btn-outline-secondary" data-comment_id="${res.commentId}">대댓글</button>
+                                        <button class="deleteBtn btn btn-sm btn-outline-danger" data-comment_id="${res.commentId}">삭제</button>
+                                    </div>
+                                </div>
+                            </li>
+                        `;
+                            $('.commentForm').find('textarea').val("");
+                            $('#comment_list > ul').append(commentMarkup);
+                        } else { // Child comment (reply)
+                            commentMarkup = `
+                            <li class="reCommentItem my-1">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <span class="fw-bold">${res.writerDto.nickname}</span>
+                                        <strong>ㄴ</strong> <span>${res.content}</span>
+                                        <small class="text-muted"><span th:text="${formattedDate}">2023-01-01 12:00</span></small>
+                                    </div>
+                                    <div>
+                                        <button class="editBtn btn btn-sm btn-outline-primary" data-comment_id="${res.reCommentId}">수정</button>
+                                        <button class="deleteBtn btn btn-sm btn-outline-danger" data-comment_id="${res.reCommentId}">삭제</button>
+                                    </div>
+                                </div>
+                            </li>
+                        `;
+                            const parentComment = $(`button[data-comment_id="${res.parentId}"]`).closest('.commentItem');
+                            let replies = parentComment.find('> ul.replies');
+
+                            if(!replies.length){ // 대댓글이 없을 때
+                                parentComment.append('<ul class="replies"></ul>');
+                                replies = parentComment.find('> ul.replies');
+                            }
+                            replies.append(commentMarkup);
+                        }
+                    }
+                },
+                error: function () {
+                    alert("댓글/대댓글 작업 중 오류가 발생했습니다.");
+                }
+            });
+        }
+    });
+
+    // 날짜를 포맷하는 함수
+    function formatDate(date, format) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear(),
+            hour = d.getHours(),
+            minute = d.getMinutes();
+
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+        if (hour.length < 2) hour = '0' + hour;
+        if (minute.length < 2) minute = '0' + minute;
+
+        format = format.replace('yyyy', year);
+        format = format.replace('MM', month);
+        format = format.replace('dd', day);
+        format = format.replace('HH', hour);
+        format = format.replace('mm', minute);
+
+        return format;
+    }
+
+    // 이제 이 함수를 사용하여 날짜를 포맷할 수 있습니다.
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="/js/scripts.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+</body>
+</html>

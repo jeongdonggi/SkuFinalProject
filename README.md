@@ -38,7 +38,6 @@ JWT를 사용함으로써 데이터베이스와의 통신을 최소화 시켜 �
 ## 주요 기능
 <img width="1019" alt="image" src="https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/2f8ffaec-e0cf-4667-aa80-3271b196eff1">
 
-
 ## 권한
 ADMIN, MANAGER, USER, SEMIUSER, GUEST로 나뉘어져 있다.
 creator는 채팅방이나 게시글, 댓글을 만들거나 작성한 사용자이다.
@@ -91,6 +90,8 @@ Session은 Token과 다르게 아이디나 비밀번호가 탈취당하더라도
 
 #### WebSocket과 STOMP
 STOMP를 WebSocket 위에서 사용함으로써 메시징 관련 명령어를 이용하여 쉽게 메시지를 보낼 수 있게 된다.
+
+## 기능 설명
 
 ### 로그인
 1. 회원 가입

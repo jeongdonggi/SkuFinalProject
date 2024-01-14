@@ -10,7 +10,40 @@ JWT 인증을 통한 게시판과 채팅 기능을 사용할 수 있는 사이�
 ## 작품 효과
 JWT를 사용함으로써 데이터베이스와의 통신을 최소화 시켜 부하를 줄일 수 있으며, 사용자 인증 정보의 보안을 강화한다. 인증 정보에 있는 권한에 따라서 사용자의 사이트 기능 사용 범위가 달라지며, 권한이 높은 사용자는 권한이 낮은 사용자를 관리하는 방법을 통하여 보안을 강화한다.
 
-# 개발 환경
+## JWT를 사용한 이유
+Session은 Token과 다르게 아이디나 비밀번호가 탈취당하더라도 Session Storage에서 값을 삭제하는 것으로 JWT보다 보안 부분에서 조금 더 좋다고 생각한다. 하지만 그럼에도 JWT를 사용하는 이유는 JWT의 확장성이 매력적으로 다가왔기 때문이다. JWT는 SecretKey만 있다면 서버의 확장이 용이하기 때문에 이번 프로젝트를 통해서 확장성이 용이하고 보안성이 뛰어난 사이트를 구현해보고 싶었다.
+
+## JWT란
+Json Web Token으로 당사자 간에 정보를 JSON 개체로 안전하게 전송하기 위한 토큰이다.
+
+JWT에선 Signature가 중요하다.
+
+### Signature
+![image](https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/d4501719-79ae-4497-b4de-3be39971691e)
+JWT는 Header, Payload, Signature로 구성되어 있다.
+
+여기서 Signature는 Header, Payload, SecretKey로 구성되어 있다.
+
+이 Signature는
+<img width="1021" alt="image" src="https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/f1e54ee7-0869-4fb6-b96a-267398c7e0c1">
+사진과 같이 JWT를 가지고 있는 사용자가 http 요청 시 JWT를 함께 보내게 되면, 서버에서는 고유 SecretKey를 이용하여 사용자가 보낸 Header, Payload를 이용해서 Signature를 생성하게 된다.
+
+생성된 Signature와 사용자의 Signature를 비교하여 동일하면 인증 성공하게 된다.
+
+### Rotating Refresh Token
+<img width="1020" alt="image" src="https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/6d8eb026-785e-4002-97e2-9e3786ed2ef5">
+위의 사진을 이해하기 전에 알아야 할 부분: AccessToken과 RefreshToken
+
+- AccessToken: 인증 시 사용하는 Token 
+- RefreshToken: AccessToken을 발급받을 때 사용하는 Token
+
+그렇다면 왜 AccessToken과 RefreshToken을 같이 사용하는 것일까?
+- accessToken을 탈취 당하게 된다면 누구나 인증이 가능하게 되기 때문에 accessToken의 유효기한을 줄이고 대신 refreshToken(JWT)를 이용해서 사용자가 로그인을 다시하는 수를 줄인다.
+- 여기서 RefreshToken을 탈취당하게 되면 AccessToken을 누구나 재발급 받을 수 있기 때문에 RefreshToken을 사용할 때마다 재발급 받는 방법을 사용한다.
+
+이와 같이 refreshToken을 재발급 받는 방식이 Rotating Refresh Token 이다.
+
+## 개발 환경
 ![Jquery](https://img.shields.io/badge/Jquery-0769AD?style=flat&logo=Jquery)
 ![AJAX](https://img.shields.io/badge/AJAX-61DAFB?style=flat&logo=AJAX)
 ![Socket.io](https://img.shields.io/badge/Socket.io-010101?style=flat&logo=Socket.io)
@@ -44,52 +77,6 @@ creator는 채팅방이나 게시글, 댓글을 만들거나 작성한 사용자
 ### front
 
 <img width="686" alt="image" src="https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/44ec2c35-1566-4b90-9a34-f29804eab5e4">
-
-## JWT란
-
-Json Web Token으로 당사자 간에 정보를 JSON 개체로 안전하게 전송하기 위한 토큰이다.
-
-JWT에선 Signature가 중요하다.
-
-### Signature
-![image](https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/d4501719-79ae-4497-b4de-3be39971691e)
-JWT는 Header, Payload, Signature로 구성되어 있다.
-
-여기서 Signature는 Header, Payload, SecretKey로 구성되어 있다.
-
-이 Signature는
-<img width="1021" alt="image" src="https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/f1e54ee7-0869-4fb6-b96a-267398c7e0c1">
-사진과 같이 JWT를 가지고 있는 사용자가 http 요청 시 JWT를 함께 보내게 되면, 서버에서는 고유 SecretKey를 이용하여 사용자가 보낸 Header, Payload를 이용해서 Signature를 생성하게 된다.
-
-생성된 Signature와 사용자의 Signature를 비교하여 동일하면 인증 성공하게 된다.
-
-### Rotating Refresh Token
-<img width="1020" alt="image" src="https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/6d8eb026-785e-4002-97e2-9e3786ed2ef5">
-위의 사진을 이해하기 전에 알아야 할 부분: AccessToken과 RefreshToken
-
-- AccessToken: 인증 시 사용하는 Token 
-- RefreshToken: AccessToken을 발급받을 때 사용하는 Token
-
-그렇다면 왜 AccessToken과 RefreshToken을 같이 사용하는 것일까?
-- accessToken을 탈취 당하게 된다면 누구나 인증이 가능하게 되기 때문에 accessToken의 유효기한을 줄이고 대신 refreshToken(JWT)를 이용해서 사용자가 로그인을 다시하는 수를 줄인다.
-- 여기서 RefreshToken을 탈취당하게 되면 AccessToken을 누구나 재발급 받을 수 있기 때문에 RefreshToken을 사용할 때마다 재발급 받는 방법을 사용한다.
-
-이와 같이 refreshToken을 재발급 받는 방식이 Rotating Refresh Token 이다.
-
-### JWT를 사용한 이유
-
-Session은 Token과 다르게 아이디나 비밀번호가 탈취당하더라도 Session Storage에서 값을 삭제하는 것으로 JWT보다 보안 부분에서 조금 더 좋다고 생각한다. 하지만 그럼에도 JWT를 사용하는 이유는 JWT의 확장성이 매력적으로 다가왔기 때문이다. JWT는 SecretKey만 있다면 서버의 확장이 용이하기 때문에 이번 프로젝트를 통해서 확장성이 용이하고 보안성이 뛰어난 사이트를 구현해보고 싶었다.
-
-## 채팅
-
-#### WebSocket
-처음 HTTP 통신을 할 때 웹소켓을 연결하고 데이터를 교환하는 방식
-
-#### STOMP
-간단한 텍스트 기반 프로토콜로 구독과 발행을 통해 메시지를 주고 받을 수 있도록 해준다.
-
-#### WebSocket과 STOMP
-STOMP를 WebSocket 위에서 사용함으로써 메시징 관련 명령어를 이용하여 쉽게 메시지를 보낼 수 있게 된다.
 
 ## 기능 설명
 

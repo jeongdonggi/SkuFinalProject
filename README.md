@@ -26,15 +26,18 @@ JWT를 사용함으로써 데이터베이스와의 통신을 최소화 시켜 �
 
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=MySQL)
 
+## 시연 영상
+<https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/5eb49227-72c9-49fd-888e-e08650ad0d25>
+
 ## 간략한 시스템 구조
 <img width="773" alt="image" src="https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/f6d47cea-a346-4009-96fb-9a5ce69d1674">
 
 ## DataBase
-
 <img width="551" alt="image" src="https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/9367f446-5ea3-4508-a939-e62f11d3218c">
 
-## 시연 영상
-<https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/5eb49227-72c9-49fd-888e-e08650ad0d25>
+## 주요 기능
+<img width="1019" alt="image" src="https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/2f8ffaec-e0cf-4667-aa80-3271b196eff1">
+
 
 ## 권한
 ADMIN, MANAGER, USER, SEMIUSER, GUEST로 나뉘어져 있다.
@@ -42,10 +45,6 @@ creator는 채팅방이나 게시글, 댓글을 만들거나 작성한 사용자
 ### front
 
 <img width="686" alt="image" src="https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/44ec2c35-1566-4b90-9a34-f29804eab5e4">
-
-
-## 주요 기능
-<img width="1019" alt="image" src="https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/2f8ffaec-e0cf-4667-aa80-3271b196eff1">
 
 ## JWT란
 

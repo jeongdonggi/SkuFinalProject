@@ -2,7 +2,7 @@
 서경대학교 컴퓨터공학과 졸업작품
 
 ## 제작 목적
-보안을 강화한 웹 메신저를 구현한다.
+JWT를 이용하여 보안을 강화한 웹 메신저를 구현한다.
 
 ## 작품 설명
 JWT 인증을 통한 게시판과 채팅 기능을 사용할 수 있는 사이트로 JWT를 가지고 HTTP 통신 시에 서버에서 토큰 인증을 받게 되고 인증에 성공하게 되면 사이트에 접근이 가능하게 된다. 또한 인증 후 자신의 권한에 따라 접근할 수 있는 기능이 달라진다.
@@ -25,6 +25,27 @@ JWT를 사용함으로써 데이터베이스와의 통신을 최소화 시켜 �
 ![Thymeleaf](https://img.shields.io/badge/Thymeleaf-005F0F?style=flat&logo=Thymeleaf)
 
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=MySQL)
+
+## 간략한 시스템 구조
+<img width="773" alt="image" src="https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/f6d47cea-a346-4009-96fb-9a5ce69d1674">
+
+## DataBase
+
+<img width="551" alt="image" src="https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/9367f446-5ea3-4508-a939-e62f11d3218c">
+
+## 시연 영상
+<https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/5eb49227-72c9-49fd-888e-e08650ad0d25>
+
+## 권한
+ADMIN, MANAGER, USER, SEMIUSER, GUEST로 나뉘어져 있다.
+creator는 채팅방이나 게시글, 댓글을 만들거나 작성한 사용자이다.
+### front
+
+<img width="686" alt="image" src="https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/44ec2c35-1566-4b90-9a34-f29804eab5e4">
+
+
+## 주요 기능
+<img width="1019" alt="image" src="https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/2f8ffaec-e0cf-4667-aa80-3271b196eff1">
 
 ## JWT란
 
@@ -57,6 +78,10 @@ JWT는 Header, Payload, Signature로 구성되어 있다.
 
 이와 같이 refreshToken을 재발급 받는 방식이 Rotating Refresh Token 이다.
 
+### JWT를 사용한 이유
+
+Session은 Token과 다르게 아이디나 비밀번호가 탈취당하더라도 Session Storage에서 값을 삭제하는 것으로 JWT보다 보안 부분에서 조금 더 좋다고 생각한다. 하지만 그럼에도 JWT를 사용하는 이유는 JWT의 확장성이 매력적으로 다가왔기 때문이다. JWT는 SecretKey만 있다면 서버의 확장이 용이하기 때문에 이번 프로젝트를 통해서 확장성이 용이하고 보안성이 뛰어난 사이트를 구현해보고 싶었다.
+
 ## 채팅
 
 #### WebSocket
@@ -67,15 +92,6 @@ JWT는 Header, Payload, Signature로 구성되어 있다.
 
 #### WebSocket과 STOMP
 STOMP를 WebSocket 위에서 사용함으로써 메시징 관련 명령어를 이용하여 쉽게 메시지를 보낼 수 있게 된다.
-
-## 권한
-ADMIN, MANAGER, USER, SEMIUSER, GUEST로 나뉘어져 있다.
-
-## 시스템 구조
-<img width="773" alt="image" src="https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/f6d47cea-a346-4009-96fb-9a5ce69d1674">
-
-## 주요 기능
-<img width="1019" alt="image" src="https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/2f8ffaec-e0cf-4667-aa80-3271b196eff1">
 
 ### 로그인
 1. 회원 가입
@@ -149,9 +165,6 @@ GUEST는 게시판 및 채팅 기능을 사용하지 못한다.
 2. 사용자 방출
     - ADMIN, MANAGER, ROOM CREATER가 방출 가능(방을 만든 사람 = ROOM CREATER)
     - 방출 시 방출된 사람한테 알림이 감(공개 채팅은 다시 들어올 수 있지만 비공개 채팅은 들어올 수 없음)
-
-## 시연 영상
-<https://github.com/jeongdonggi/SkuFinalProject/assets/100845304/5eb49227-72c9-49fd-888e-e08650ad0d25>
 
 ## 성과
 

@@ -168,5 +168,4 @@ AccessToken과 RefreshToken이 명확하게 구분되어 Rotating RefreshToken �
 4. 채팅에 있는 기능이 부실하다.
 
 ### 향후 개선 방안
-1. header에 JWT 넣어 보내기
-2. 배포
+배포하기

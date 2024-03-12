@@ -165,8 +165,7 @@ AccessToken과 RefreshToken이 명확하게 구분되어 Rotating RefreshToken �
 1. 프로젝트를 진행하면서 Rotating RefreshToken 방식에서 더 나아가질 못하였다.
 2. 권한이 딱 정해져 있기 때문에 유연한 권한 부여가 안되어 있다.
 3. 프로젝트 배포를 해보지 못하였다.
-4. http header에 JWT를 넣는 방법으로 구현하다가 쿠키로 바로 넣는 방식으로 구현하여 JWT가 실제로 구현되는 방식 대로 구현하지 못하였다.
-5. 채팅에 있는 기능이 부실하다.
+4. 채팅에 있는 기능이 부실하다.
 
 ### 향후 개선 방안
 1. header에 JWT 넣어 보내기
